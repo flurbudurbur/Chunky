@@ -5,6 +5,7 @@ import org.popcraft.chunky.GenerationTask;
 import org.popcraft.chunky.Selection;
 import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
 import org.popcraft.chunky.api.event.task.GenerationProgressEvent;
+import org.popcraft.chunky.api.event.task.GenerationStartEvent;
 import org.popcraft.chunky.platform.World;
 import org.popcraft.chunky.util.Input;
 import org.popcraft.chunky.util.Parameter;
@@ -37,6 +38,16 @@ public class ChunkyAPIImpl implements ChunkyAPI {
         }
         if (chunky.getGenerationTasks().containsKey(world)) {
             return false;
+        }
+        // Fire pre-start event (skip for CSV patterns to prevent loops)
+        if (pattern == null || !pattern.startsWith("csv")) {
+            final GenerationStartEvent startEvent = new GenerationStartEvent(
+                    world, shape, centerX, centerZ, radiusX, radiusZ, pattern == null ? "" : pattern
+            );
+            chunky.getEventBus().call(startEvent);
+            if (startEvent.isCancelled()) {
+                return true;
+            }
         }
         final Selection selection = Selection.builder(chunky, implWorld)
                 .shape(shape).center(centerX, centerZ)
@@ -88,6 +99,11 @@ public class ChunkyAPIImpl implements ChunkyAPI {
         chunky.getGenerationTasks().remove(world).stop(true);
         chunky.getTaskLoader().cancelTask(implWorld);
         return true;
+    }
+
+    @Override
+    public void onGenerationStart(final Consumer<GenerationStartEvent> listener) {
+        chunky.getEventBus().subscribe(GenerationStartEvent.class, listener);
     }
 
     @Override

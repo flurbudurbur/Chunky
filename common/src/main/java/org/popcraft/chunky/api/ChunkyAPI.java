@@ -2,6 +2,7 @@ package org.popcraft.chunky.api;
 
 import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
 import org.popcraft.chunky.api.event.task.GenerationProgressEvent;
+import org.popcraft.chunky.api.event.task.GenerationStartEvent;
 
 import java.util.function.Consumer;
 
@@ -62,6 +63,14 @@ public interface ChunkyAPI {
      * @return If the task was cancelled
      */
     boolean cancelTask(final String world);
+
+    /**
+     * Register a listener for generation start events.
+     * This event fires before generation begins and can be cancelled.
+     *
+     * @param listener The listener
+     */
+    void onGenerationStart(final Consumer<GenerationStartEvent> listener);
 
     /**
      * Register a listener for generation progress events.

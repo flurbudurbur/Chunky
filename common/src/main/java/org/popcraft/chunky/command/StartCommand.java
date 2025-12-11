@@ -3,6 +3,7 @@ package org.popcraft.chunky.command;
 import org.popcraft.chunky.Chunky;
 import org.popcraft.chunky.GenerationTask;
 import org.popcraft.chunky.Selection;
+import org.popcraft.chunky.api.event.task.GenerationStartEvent;
 import org.popcraft.chunky.platform.Sender;
 import org.popcraft.chunky.platform.World;
 import org.popcraft.chunky.shape.ShapeType;
@@ -81,6 +82,20 @@ public class StartCommand implements ChunkyCommand {
             return;
         }
         final Runnable startAction = () -> {
+            // Fire pre-start event
+            final GenerationStartEvent startEvent = new GenerationStartEvent(
+                    current.world().getName(),
+                    current.shape(),
+                    current.centerX(),
+                    current.centerZ(),
+                    current.radiusX(),
+                    current.radiusZ(),
+                    current.pattern().toString()
+            );
+            chunky.getEventBus().call(startEvent);
+            if (startEvent.isCancelled()) {
+                return;
+            }
             final GenerationTask generationTask = new GenerationTask(chunky, current);
             chunky.getGenerationTasks().put(current.world().getName(), generationTask);
             chunky.getScheduler().runTask(generationTask);

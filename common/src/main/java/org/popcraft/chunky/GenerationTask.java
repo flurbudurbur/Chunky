@@ -167,7 +167,7 @@ public class GenerationTask implements Runnable {
         chunky.getGenerationTasks().remove(selection.world().getName());
         Thread.currentThread().setName(poolThreadName);
         chunky.getEventBus().call(new GenerationTaskFinishEvent(this));
-        chunky.getEventBus().call(new GenerationCompleteEvent(selection.world().getName()));
+        chunky.getEventBus().call(new GenerationCompleteEvent(selection.world().getName(), finishedChunks.get(), cancelled));
     }
 
     public void stop(final boolean cancelled) {
